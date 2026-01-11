@@ -1,8 +1,8 @@
 import { useState } from "react";
+import axios from "axios";
 
 function App() {
   const [page, setPage] = useState("login");
-  const [users, setUsers] = useState([]);
   const [loggedInUser, setLoggedInUser] = useState(null);
 
   return (
@@ -10,11 +10,11 @@ function App() {
       <h1 style={styles.heading}>Welcome to PrepPortal</h1>
 
       {page === "login" && (
-        <Login users={users} setLoggedInUser={setLoggedInUser} setPage={setPage} />
+        <Login setLoggedInUser={setLoggedInUser} setPage={setPage} />
       )}
 
       {page === "signup" && (
-        <Signup users={users} setUsers={setUsers} setPage={setPage} />
+        <Signup setPage={setPage} />
       )}
 
       {page === "signup-success" && (
@@ -28,23 +28,25 @@ function App() {
   );
 }
 
-/* ---------------- LOGIN ---------------- */
+/* ---------------- LOGIN (Clean & Connected) ---------------- */
 
-function Login({ users, setLoggedInUser, setPage }) {
-  const [username, setUsername] = useState("");
+function Login({ setLoggedInUser, setPage }) {
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  const handleLogin = () => {
-    const user = users.find(
-      (u) => u.username === username && u.password === password
-    );
+  const handleLogin = async () => {
+    try {
+      const res = await axios.post("http://localhost:5000/auth/login", {
+        email: email,
+        password: password
+      });
 
-    if (user) {
-      setLoggedInUser(user);
+      setLoggedInUser(res.data.user);
       setPage("dashboard");
-    } else {
-      setError("Invalid username or password");
+
+    } catch (err) {
+      setError(err.response?.data?.msg || "Login failed");
     }
   };
 
@@ -53,10 +55,11 @@ function Login({ users, setLoggedInUser, setPage }) {
       <h2>Student Login</h2>
 
       <input
-        placeholder="Username"
+        type="email"
+        placeholder="Email" 
         style={styles.input}
-        value={username}
-        onChange={(e) => setUsername(e.target.value)}
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
       />
 
       <input
@@ -83,41 +86,46 @@ function Login({ users, setLoggedInUser, setPage }) {
   );
 }
 
-/* ---------------- SIGNUP ---------------- */
+/* ---------------- SIGNUP (Clean & Connected) ---------------- */
 
-function Signup({ users, setUsers, setPage }) {
+function Signup({ setPage }) {
+  // Removed RollNo, Username, and Role from state
   const [form, setForm] = useState({
     name: "",
-    rollNo: "",
-    username: "",
     email: "",
     password: "",
-    role: "student",
   });
+  const [error, setError] = useState("");
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSignup = () => {
-    setUsers([...users, form]);
-    setPage("signup-success");
+  const handleSignup = async () => {
+    try {
+      await axios.post("http://localhost:5000/auth/register", {
+        name: form.name,
+        email: form.email,
+        password: form.password
+      });
+      
+      setPage("signup-success");
+
+    } catch (err) {
+      setError(err.response?.data?.msg || "Signup failed");
+    }
   };
 
   return (
     <div style={styles.card}>
       <h2>Create Account</h2>
 
+      {/* Only fields that exist in DB */}
       <input name="name" placeholder="Full Name" style={styles.input} onChange={handleChange} />
-      <input name="rollNo" placeholder="Roll Number" style={styles.input} onChange={handleChange} />
-      <input name="username" placeholder="Username" style={styles.input} onChange={handleChange} />
       <input name="email" placeholder="Email" style={styles.input} onChange={handleChange} />
       <input name="password" type="password" placeholder="Password" style={styles.input} onChange={handleChange} />
 
-      <select name="role" style={styles.input} onChange={handleChange}>
-        <option value="student">Student</option>
-        <option value="admin">Admin</option>
-      </select>
+      {error && <p style={styles.error}>{error}</p>}
 
       <button style={styles.button} onClick={handleSignup}>
         Sign Up
@@ -140,7 +148,7 @@ function SignupSuccess({ setPage }) {
     <div style={styles.card}>
       <h2>🎉 Account Created!</h2>
       <p style={{ margin: "15px 0" }}>
-        Your account has been created successfully.
+        Your account has been saved to the Database.
       </p>
 
       <button style={styles.button} onClick={() => setPage("login")}>
@@ -156,8 +164,9 @@ function Dashboard({ user, setPage }) {
   return (
     <div style={styles.card}>
       <h2>Welcome, {user?.name}</h2>
-      <p><b>Role:</b> {user?.role}</p>
       <p><b>Email:</b> {user?.email}</p>
+      {/* Removed Role display since we aren't saving it yet */}
+      <p><b>ID:</b> {user?.id}</p>
       <p><b>Placement Status:</b> Not Placed</p>
 
       <button style={{ ...styles.button, marginTop: "15px" }} onClick={() => setPage("login")}>
@@ -170,57 +179,14 @@ function Dashboard({ user, setPage }) {
 /* ---------------- STYLES ---------------- */
 
 const styles = {
-  page: {
-    minHeight: "100vh",
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: "center",
-    alignItems: "center",
-    background: "#f2f2f2",
-  },
-  heading: {
-    marginBottom: "20px",
-  },
-  card: {
-    width: "320px",
-    background: "#fff",
-    padding: "20px",
-    borderRadius: "8px",
-    textAlign: "center",
-    boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
-  },
-  input: {
-    width: "100%",
-    padding: "8px",
-    margin: "6px 0",
-  },
-  button: {
-    width: "100%",
-    padding: "10px",
-    marginTop: "10px",
-    background: "#111",
-    color: "#fff",
-    border: "none",
-    borderRadius: "5px",
-    cursor: "pointer",
-  },
-  link: {
-    color: "blue",
-    cursor: "pointer",
-  },
-  text: {
-    marginTop: "10px",
-    fontSize: "14px",
-  },
-  error: {
-    color: "red",
-    fontSize: "14px",
-  },
+  page: { minHeight: "100vh", display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", background: "#f2f2f2" },
+  heading: { marginBottom: "20px" },
+  card: { width: "320px", background: "#fff", padding: "20px", borderRadius: "8px", textAlign: "center", boxShadow: "0 4px 10px rgba(0,0,0,0.1)" },
+  input: { width: "100%", padding: "8px", margin: "6px 0", boxSizing: "border-box" },
+  button: { width: "100%", padding: "10px", marginTop: "10px", background: "#111", color: "#fff", border: "none", borderRadius: "5px", cursor: "pointer" },
+  link: { color: "blue", cursor: "pointer" },
+  text: { marginTop: "10px", fontSize: "14px" },
+  error: { color: "red", fontSize: "14px", marginTop: "5px" },
 };
 
 export default App;
-
-
-
-
-
