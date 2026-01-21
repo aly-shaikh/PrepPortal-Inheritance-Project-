@@ -8,11 +8,11 @@ import Stats from "./pages/stats/Stats";
 import Profile from "./pages/profile/Profile";
 import EditProfile from "./pages/profile/EditProfile";
 import Login from "./pages/auth/StudentLogin";
-import Signup from "./pages/auth/Signup"; // We will make this file next!
+import Signup from "./pages/auth/Signup"; 
 
 function App() {
   const [loggedInUser, setLoggedInUser] = useState(null);
-  const [loading, setLoading] = useState(true); // New: Wait until we check memory
+  const [loading, setLoading] = useState(true); 
 
   useEffect(() => {
     // Check Local Storage when app starts
@@ -20,10 +20,10 @@ function App() {
     if (savedUser) {
       setLoggedInUser(JSON.parse(savedUser));
     }
-    setLoading(false); // Finished checking
+    setLoading(false); 
   }, []);
 
-  if (loading) return <div>Loading...</div>; // Don't kick user out while checking
+  if (loading) return <div>Loading...</div>; 
 
   return (
     <BrowserRouter>
