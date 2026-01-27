@@ -42,6 +42,13 @@ A full-stack MERN web application designed to streamline the placement process f
 * **Body-Parser:** Configured for large payload limits (50MB) to handle PDF/Image uploads.
 
 ---
+## 👨‍💻 Author
+
+**MOHD ALI RAZA SHAIKH, STESHA PHARKHE**
+
+* **Role:** Full Stack Developer (Backend Lead), Frontend Developer(Lead)
+* **Institution:** Veermata Jijabai Technological Institute (VJTI)
+* **Focus:** Electronics Engineering & Software Development
 
 ## ⚙️ Installation & Setup Guide
 
@@ -51,3 +58,5 @@ Follow these steps to run the project locally.
 ```bash
 git clone [https://github.com/YourUsername/VJTI-PrePortal.git](https://github.com/YourUsername/VJTI-PrePortal.git)
 cd VJTI-PrePortal
+
+
